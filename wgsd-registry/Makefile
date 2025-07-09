@@ -15,7 +15,7 @@ define Package/wgsd-registry
   SUBMENU:=VPN
   TITLE:=WireGuard Service Discovery Registry (ucode)
   PKGARCH:=all
-  DEPENDS:=+ucode-mod-ubus +rpcd-mod-wireguard
+  DEPENDS:=+ucode-mod-ubus +ucode-mod-socket +rpcd-mod-wireguard +coreutils-base32
 endef
 
 define Package/wgsd-registry-awg
