@@ -15,6 +15,16 @@ define Package/wgsd-registry
   SUBMENU:=VPN
   TITLE:=WireGuard Service Discovery Registry (ucode)
   PKGARCH:=all
+  DEPENDS:=+ucode-mod-ubus +rpcd-mod-wireguard
+endef
+
+define Package/wgsd-registry-awg
+  SECTION:=net
+  CATEGORY:=Network
+  SUBMENU:=VPN
+  TITLE:=AmneziaWG Service Discovery Registry (ucode)
+  PKGARCH:=all
+  DEPENDS:=wgsd-registry +rpcd-mod-amneziawg
 endef
 
 Build/Compile=
@@ -38,3 +48,4 @@ define Package/wgsd-registry/install
 endef
 
 $(eval $(call BuildPackage,wgsd-registry))
+$(eval $(call BuildPackage,wgsd-registry-awg))
