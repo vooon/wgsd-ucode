@@ -1,0 +1,11 @@
+#!/bin/sh /etc/rc.common
+
+START=99
+
+USE_PROCD=1
+PROG=/usr/bin/wgsd-registry
+CONF=wgsd-registry
+
+start_service() {
+	// TODO: process conf
+}
