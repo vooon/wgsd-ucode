@@ -44,5 +44,5 @@ esac
 zone_file="/tmp/wgsd/${zone}zone"
 mkdir -p "$(dirname "$zone_file")"
 
-ucode -Ddevice="$device" -Drpc_object="$rpc_object" -Dzone="$zone" -Dttl="$ttl" -T /usr/share/ucode/wgsd/zone.uc
+ucode -Ddevice="$device" -Drpc_object="$rpc_object" -Dzone="$zone" -Dttl="$ttl" -T /usr/share/ucode/wgsd/zone.uc > "$zone_file"
 

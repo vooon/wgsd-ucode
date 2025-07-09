@@ -5,18 +5,24 @@
 
 const ubus = require("ubus");
 // const socket = require("socket");
+const fs = require("fs");
 
 const bus = ubus.connect();
 
 const BASE32_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
 
 function b32enc(data) {
-	// TODO?
+	// fuck.
+	const p = fs.popen("base32", "rwe");
+	p.write(data);
+	p.close();
+	return p.read("all");
 }
 
 function enc_peer(d) {
 	// TODO: use base32 enc as in original code
-	return hexenc(d)
+	return hexenc(d);
+	// return b32enc(d);
 }
 
 %}
@@ -43,7 +49,7 @@ const peers = x[device]["peers"];
 %}
 {% for (peer, data in peers): %}
 {%   if (!data["last_handshake"]): %}
-// Peer: {{ peer }} is offline, skipping
+;; Peer: {{ peer }} is offline, skipping
 {%   else %}
 {%
        const peer_hash = enc_peer(b64dec(peer));
@@ -59,7 +65,7 @@ const peers = x[device]["peers"];
        assert(endpoint, "no endpoint");
        const allowed = join(",", data["allowed_ips"]);
 %}
-// Peer: {{ peer }} - {{ endpoint }}
+;; Peer: {{ peer }} - {{ endpoint }}
 _wireguard._udp IN PTR {{ peer_host }}
 {{ peer_host }} IN {{ ep_type }} {{ ep_addr }}
 {{ peer_host }} IN SRV 0 0 {{ ep_port }} {{ peer_host }}
