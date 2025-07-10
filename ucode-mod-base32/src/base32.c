@@ -19,7 +19,7 @@
 
 #include "base32.h"
 
-int base32_decode(const uint8_t *encoded, uint8_t *result, int bufSize) {
+static int base32_decode(const uint8_t *encoded, uint8_t *result, int bufSize) {
   unsigned int buffer = 0;
   int bitsLeft = 0;
   int count = 0;
@@ -61,7 +61,7 @@ int base32_decode(const uint8_t *encoded, uint8_t *result, int bufSize) {
   return count;
 }
 
-int base32_encode(const uint8_t *data, int length, uint8_t *result,
+static int base32_encode(const uint8_t *data, int length, uint8_t *result,
                   int bufSize) {
   if (length < 0 || length > (1 << 28)) {
     return -1;
