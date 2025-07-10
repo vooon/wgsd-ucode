@@ -1,0 +1,29 @@
+#!/bin/sh /etc/rc.common
+
+START=99
+
+USE_PROCD=1
+PROG=/usr/bin/wgsd-registry
+CONF=wgsd-registry
+
+start_instance() {
+	local s="$1"
+
+	config_get_bool disabled "$s" disabled 0
+	[ $disabled -gt 0 ] && return
+
+	config_get interface "$s" interface
+	config_get zone "$s" zone
+	config_get ttl "$s" ttl 60
+
+	procd_open_instance "$s"
+	procd_set_param command "$PROG" -i "$interface" -z "$zone" -t "$ttl"
+	procd_set_param respawn
+	procd_set_param file "/etc/config/$CONF"
+	procd_close_instance
+}
+
+start_service() {
+	config_load "$CONF"
+	config_foreach start_instance 'registry'
+}
