@@ -47,7 +47,7 @@ case $protocol in
 esac
 
 ucode \
-	-Ddevice="$device" -Drpc_object="$rpc_object" \
-	-Dzone="$zone" -Dwg_bin="$wg_bin" \
-	-Ddns_server="$dns_server" \
+	-Ddevice="$device" -Drpc_object="$rpc_object" -Dwg_bin="$wg_bin" \
+	-Dzone="$zone" -Ddns_server="$dns_server" \
 	/usr/share/ucode/wgsd/client.uc
+exit $?

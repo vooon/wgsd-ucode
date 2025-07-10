@@ -15,7 +15,7 @@ define Package/wgsd-client-ucode
   SUBMENU:=VPN
   TITLE:=WireGuard Service Discovery Client (ucode)
   PKGARCH:=all
-  DEPENDS:=+ucode-mod-ubus +ucode-mod-base32 +ucode-mod-resolve +rpcd-mod-wireguard
+  DEPENDS:=+ucode-mod-ubus +ucode-mod-base32 +ucode-mod-resolv +rpcd-mod-wireguard
 endef
 
 define Package/wgsd-client-ucode-awg
