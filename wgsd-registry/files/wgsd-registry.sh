@@ -10,8 +10,9 @@ panic() {
 interface=""
 zone=""
 ttl="60"
+nosleep="0"
 
-while getopts "i:z:t:" opt; do
+while getopts "i:z:t:F" opt; do
 	case $opt in
 		i)
 			interface="${OPTARG}"
@@ -21,6 +22,9 @@ while getopts "i:z:t:" opt; do
 			;;
 		t)
 			ttl="${OPTARG}"
+			;;
+		F)
+			nosleep="1"
 			;;
 	esac
 done
@@ -44,5 +48,9 @@ esac
 zone_file="/tmp/wgsd/${zone}zone"
 mkdir -p "$(dirname "$zone_file")"
 
-ucode -Ddevice="$device" -Drpc_object="$rpc_object" -Dzone="$zone" -Dttl="$ttl" -T /usr/share/ucode/wgsd/zone.uc > "$zone_file"
-
+while true; do
+	ucode -Ddevice="$device" -Drpc_object="$rpc_object" -Dzone="$zone" -Dttl="$ttl" \
+		-T /usr/share/ucode/wgsd/zone.uc > "$zone_file"
+	[ $nosleep -gt 0 ] && exit
+	sleep "$ttl"
+done
