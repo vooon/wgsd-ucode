@@ -5,6 +5,7 @@ import * as log from "log";
 import { connect } from "ubus";
 import { b32enc } from "base32";
 import * as resolv from "resolv";
+import * as socket from "socket";
 
 function get_addr(r) {
 	if (exists(r, 'rcode') && r.rcode === "NXDOMAIN") {
@@ -31,20 +32,19 @@ function resolve_dns_server() {
 		ns_port = substr(dns_server, ns_sep_idx + 1);
 	}
 
-	ret = resolv.query([ns_domain]);
-	if (!ret || !ret[ns_domain] || ret[ns_domain]["rcode"] === "NXDOMAIN") {
-		log.ERR("Failed to resolve dns server address, host: %s, return: %s, error: %s\n", ns_domain, ret, resolv.error());
-		exit(1);
-	}
+	const addrs = socket.addrinfo(ns_domain);
+	assert(length(addrs) > 0, "dns resolve error");
 
-	addr = get_addr(ret[ns_domain]);
-	assert(addr, "impossibru!");
+	// TODO: better address peak up
+	const addr = addrs[0].addr.address;
+	assert(addr, "bad address");
 
 	return `${ addr }#${ ns_port }`;
 }
 
 
-log.openlog(`wgsd-client.${ device }`, log.LOG_CONS, log.LOG_DAEMON);
+// log.openlog(`wgsd-client.${ device }`, log.LOG_CONS, log.LOG_DAEMON);
+log.ulog_open(["syslog", "stdio"], "daemon", `wgsd-client.${ device }`);
 
 const bus = connect();
 assert(bus, "failed to connect to ubus");
@@ -93,7 +93,7 @@ for (peer, q in queries) {
 	push(srv_hosts, q.host);
 }
 
-log.INFO("Quering SRV %d records...\n", length(srv_hosts));
+log.INFO("Quering SRV for %d hosts...\n", length(srv_hosts));
 
 const srv_opts = {
 	type: "SRV",
@@ -112,8 +112,8 @@ for (host, resp in srvs) {
 	let q = queries[host];
 	assert(q, "unexpected host");
 
-	if (resp.rcode === "NXDOMAIN") {
-		log.WARN("Peer SRV not found: %s, host: %s\n", q.peer, host);
+	if (exists(resp, 'rcode')) {
+		log.WARN("Peer SRV: %s, host: %s, rcode: %s\n", q.peer, host, resp.rcode);
 		q.not_found = true;
 		continue;
 	}
@@ -166,7 +166,7 @@ for (host, resp in addrs) {
 }
 
 // 3. Parse TXT?
-// TODO skip. original also don't do that...
+// TODO skip. Original also don't do that...
 
 log.INFO("Resolve complete. Applying...\n");
 
@@ -178,7 +178,7 @@ for (host, q in queries) {
 
 	let endpoint = `${ q.addr }:${ q.srv_port }`;
 	if (q.endpoint === endpoint) {
-		log.INFO("Peer already has endpoint set: %s: %s\n", q.peer, q.endpoint);
+		log.INFO("Peer endpoint match, nothing to do: %s - %s\n", q.peer, q.endpoint);
 		continue;
 	}
 
@@ -189,7 +189,7 @@ for (host, q in queries) {
 
 	rc = system(args);
 	if (rc != 0) {
-		log.ERR("Failed to apply change for peer: %s\n", q.peer);
+		log.ERR("Failed to apply change for peer: %s, rc: %d\n", q.peer, rc);
 	}
 }
 
