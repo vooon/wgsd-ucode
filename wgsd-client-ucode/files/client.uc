@@ -6,8 +6,7 @@ import { connect } from "ubus";
 import { b32enc } from "base32";
 import * as resolv from "resolv";
 
-function get_addr(qhost, qret) {
-	const r = qret[qhost];
+function get_addr(r) {
 	if (exists(r, 'rcode') && r.rcode === "NXDOMAIN") {
 		log.ERR("Domain not found: %s\n", qhost);
 		return null;
@@ -38,7 +37,7 @@ function resolve_dns_server() {
 		exit(1);
 	}
 
-	addr = get_addr(ns_domain, ret);
+	addr = get_addr(ret[ns_domain]);
 	assert(addr, "impossibru!");
 
 	return `${ addr }#${ ns_port }`;
@@ -76,9 +75,9 @@ for (peer, data in peers) {
 		srv_port: 0,
 		srv_host: '',
 		addr: '',
-		endpoint: '',
-		allowed_ips: [],
 		not_found: false,
+		endpoint: data.endpoint,
+		allowed_ips: data.allowed_ips || [],
 	};
 
 	queries[host] = q;
@@ -163,9 +162,35 @@ for (host, resp in addrs) {
 		continue;
 	}
 
-	q.addr = get_addr(host, resp);
+	q.addr = get_addr(resp);
 }
 
+// 3. Parse TXT?
+// TODO skip. original also don't do that...
 
+log.INFO("Resolve complete. Applying...\n");
 
-log.INFO(`res: ${ q }\n`);
+for (host, q in queries) {
+	if (q.not_found) {
+		log.INFO("Peer info not found, skipping: %s\n", q.peer);
+		continue;
+	}
+
+	let endpoint = `${ q.addr }:${ q.srv_port }`;
+	if (q.endpoint === endpoint) {
+		log.INFO("Peer already has endpoint set: %s: %s\n", q.peer, q.endpoint);
+		continue;
+	}
+
+	log.NOTE("Changing peer endpoint: %s, %s -> %s\n", q.peer, q.endpoint, endpoint);
+
+	const args = [wg_bin, 'set', device, 'peer', q.peer, 'endpoint', endpoint];
+	log.ulog(log.LOG_DEBUG, "Execute command: %s\n", args);
+
+	rc = system(args);
+	if (rc != 0) {
+		log.ERR("Failed to apply change for peer: %s\n", q.peer);
+	}
+}
+
+log.NOTE("Done.\n");
