@@ -1,5 +1,5 @@
 // base32 module for ucode
-// Quick and durty, but i do not want to reimplement thew wheel on ucode.
+// Quick and dirty, but i do not want to reimplement the wheel on ucode.
 
 #include <inttypes.h>
 
