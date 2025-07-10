@@ -3,26 +3,14 @@
  #}
 {%
 
-const ubus = require("ubus");
-// const socket = require("socket");
-const fs = require("fs");
+import { connect } from "ubus";
+import { b32enc } from "base32";
 
-const bus = ubus.connect();
-
-const BASE32_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
-
-function b32enc(data) {
-	// fuck.
-	const p = fs.popen("base32", "rwe");
-	p.write(data);
-	p.close();
-	return p.read("all");
-}
+const bus = connect();
 
 function enc_peer(d) {
-	// TODO: use base32 enc as in original code
-	return hexenc(d);
-	// return b32enc(d);
+	// return hexenc(d);
+	return b32enc(d);
 }
 
 %}

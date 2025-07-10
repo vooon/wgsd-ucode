@@ -29,7 +29,7 @@ endef
 
 define Build/Compile
 	$(TARGET_CC) $(TARGET_CFLAGS) $(TARGET_LDFLAGS) $(FPIC) \
-		-Wall -ffunction-sections -Wl,--gc-sections -shared -Wl,--no-as-needed -lbase32 \
+		-Wall -ffunction-sections -Wl,--gc-sections -shared -Wl,--no-as-needed \
 		-o $(PKG_BUILD_DIR)/base32.so $(PKG_BUILD_DIR)/ucode_adapter.c
 endef
 

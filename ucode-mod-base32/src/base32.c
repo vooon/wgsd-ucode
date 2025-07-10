@@ -17,7 +17,7 @@
 
 #include <string.h>
 
-#include "base32.h"
+// #include "base32.h"
 
 static int base32_decode(const uint8_t *encoded, uint8_t *result, int bufSize) {
   unsigned int buffer = 0;

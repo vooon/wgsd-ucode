@@ -1,5 +1,7 @@
 // base32 module for ucode
+// Quick and durty, but i do not want to reimplement thew wheel on ucode.
 
+#include <inttypes.h>
 #include "ucode/module.h"
 
 // inline original library
@@ -9,26 +11,35 @@ static uc_value_t* uc_b32enc(uc_vm_t *vm, size_t nargs){
 	uc_value_t *str = uc_fn_arg(0);
 	uc_value_t *ret = NULL;
 	const uint8_t *src, *buf;
-	size_t len;
+	uint8_t stack_buf[128] = {0};
+	size_t len, buflen;
 	int reslen;
 
 	if (ucv_type(str) != UC_STRING)
 		return NULL;
 
-	src = uc_string_get(str);
-	len = uc_string_length(str);
+	src = ucv_string_get(str);
+	len = ucv_string_length(str);
 
-	// encoded string should be smaller
-	buf = xcalloc(1, len);
+	// base32 takes 160% more data, but easier to reserve 200%
+	if (len * 2 < sizeof(stack_buf)) {
+		buflen = sizeof(stack_buf);
+		buf = stack_buf;
+	} else {
+		buflen = len * 2;
+		buf = xcalloc(1, buflen);
+	}
 
-	reslen = base32_encode(src, len, buf, len);
+	reslen = base32_encode(src, len, buf, buflen);
 	if (reslen < 0) {
-		free(buf);
+		if (buf != stack_buf)
+			free(buf);
 		return NULL;
 	}
 
 	ret = ucv_string_new_length(buf, reslen);
-	free(buf);
+	if (buf != stack_buf)
+		free(buf);
 
 	return ret;
 }
