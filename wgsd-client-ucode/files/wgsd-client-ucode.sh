@@ -25,8 +25,8 @@ while getopts "i:z:s:" opt; do
 	esac
 done
 
-if [ -z "$interface" ] || [ -z "$zone" ]; then
-	panic "-i and -z required"
+if [ -z "$interface" ] || [ -z "$zone" ] || [ -z "$dns_server" ]; then
+	panic "-i, -s and -z required"
 fi
 
 network_get_device device "$interface" || panic "failed to get interface: $interface"
