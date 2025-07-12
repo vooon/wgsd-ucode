@@ -11,6 +11,10 @@ function enc_peer(key) {
 	return lc(b32enc(key));
 }
 
+function enc_peer_no_padding(d) {
+	return rtrim(enc_peer(d), "=");
+}
+
 function get_addr(r) {
 	if (exists(r, 'rcode') && r.rcode === "NXDOMAIN") {
 		log.ERR("Domain not found: %s\n", qhost);
@@ -207,7 +211,7 @@ if (set_allowed_ips) {
 			continue;
 		}
 
-		const kv = parse_txt_kv(resp.TXT);
+		const kv = parse_txt_kv(resp.TXT[0]);
 		assert(kv.txtvers === "1", "unexpected txtvers");
 		assert(kv.pub === q.peer, "unexpected peer pub key");
 
