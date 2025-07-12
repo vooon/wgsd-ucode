@@ -59,6 +59,25 @@ function resolve_dns_server() {
 	return `${ addr }#${ ns_port }`;
 }
 
+function contains_ip(a, b) {
+	for (ip in a) {
+		if (!(ip in b)) {
+			return false;
+		}
+	}
+
+	return length(a) > 0;
+}
+
+function merge_set(...arr) {
+	let ret = [];
+
+	for (a in arr) {
+		push(ret, ...a);
+	}
+
+	return uniq(ret);
+}
 
 // log.openlog(`wgsd-client.${ device }`, log.LOG_CONS, log.LOG_DAEMON);
 log.ulog_open(["syslog", "stdio"], "daemon", `wgsd-client.${ device }`);
@@ -211,6 +230,9 @@ if (set_allowed_ips) {
 			continue;
 		}
 
+		//log.INFO("host: %s\n", host);
+		//log.INFO("TXT: %s\n", resp);
+
 		const kv = parse_txt_kv(resp.TXT[0]);
 		assert(kv.txtvers === "1", "unexpected txtvers");
 		assert(kv.pub === q.peer, "unexpected peer pub key");
@@ -242,8 +264,8 @@ for (host, q in queries) {
 		}
 	}
 
-	let allowed_ips = uniq(q.allowed_ips + q.txt_allowed_ips);
-	if (q.allowed_ips === allowed_ips) {
+	let allowed_ips = merge_set(q.allowed_ips, q.txt_allowed_ips);
+	if (length(allowed_ips) == 0 || contains_ip(allowed_ips, q.allowed_ips)) {
 		log.INFO("Peer allowed_ips match, nothing to do: %s\n", q.peer);
 	} else {
 		allowed_ips_arg = join(',', allowed_ips);
