@@ -40,6 +40,16 @@ function parse_txt_kv(kvs) {
 	return d;
 }
 
+function parse_txt(strs) {
+	for (s in strs) {
+		if (index(s, "v=WGSD1") < 0) {
+			continue;
+		}
+
+		return parse_txt_kv(split(s, ";"));
+	}
+}
+
 function resolve_dns_server() {
 	const ns_sep_idx = rindex(dns_server, ":");
 	let ns_domain = dns_server;
@@ -230,11 +240,8 @@ if (set_allowed_ips) {
 			continue;
 		}
 
-		//log.INFO("host: %s\n", host);
-		//log.INFO("TXT: %s\n", resp);
-
-		const kv = parse_txt_kv(resp.TXT[0]);
-		assert(kv.txtvers === "1", "unexpected txtvers");
+		const kv = parse_txt(resp.TXT);
+		// assert(kv.txtvers === "1", "unexpected txtvers");
 		assert(kv.pub === q.peer, "unexpected peer pub key");
 
 		q.txt_allowed_ips = filter(map(split(kv.allowed, ","), x => trim(x)), length);
