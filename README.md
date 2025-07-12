@@ -67,7 +67,7 @@ wgsd-client-ucode
 Discovery client, that setup endpoints published by registry.
 
 ```
-wgsd-client-ucode -i <INTERFACE> -s <DNS-SERVER> -z <ZONE>
+wgsd-client-ucode -i <INTERFACE> -s <DNS-SERVER> -z <ZONE> [-a]
 ```
 
 | Option | Req | Description |
@@ -75,11 +75,43 @@ wgsd-client-ucode -i <INTERFACE> -s <DNS-SERVER> -z <ZONE>
 | `-i <INTERFACE>`  | Yes | Interface name. |
 | `-s <DNS-SERVER>` | Yes | DNS server that serves registry zone(s), `<host-or-ip>[:<port>]` |
 | `-z <ZONE>`       | Yes | Registry zone name. |
+| `-a`              | No  | Assign Allowed IPs from registry. |
 
 Add line like that to cron tab:
 ```cron
 1,6,11,16,21,26,31,36,41,46,51,56 * * * * wgsd-client-ucode -i vpn_wg -s ns.example.com:5353 -z wg.example.com
 ```
+
+> [!NOTE]
+> `-a` option merge existing Allowed IPs with the one exposed by registry TXT records.
+> Please note, that if you change this list on registry, peer would keep old IPs until interface restart.
+
+
+Configuration notes
+-------------------
+
+### Firewall
+
+> [!NOTE]
+> By default firewall accept incoming packets on WAN only from known destination, i.e. from your registry node.
+> So mesh peers couldn't establish connection to each other.
+> To overcome that set static port on WG/AWG interface and the add firewall rule to allow incoming UDP on that port.
+
+### Hide registry information
+
+> [!NOTE]
+> If you don't want to expose your public keys and IPs to the internet, simply use your registry connection.
+
+Suppose you use `10.0.0.0/24` for your VPN network, and `10.0.0.1` for the registry.
+
+```corefile
+wg.example.com.:5353 {
+  bind 10.0.0.1
+  # ...
+}
+```
+
+And then use `-s 10.0.0.1:5353` on the client side.
 
 
 Extra packages
@@ -114,6 +146,12 @@ wg.example.com.:5353 {
   }
 }
 ```
+
+
+Legal
+-----
+
+WireGuard is a registered trademark of Jason A. Donenfeld.
 
 
 [1]: https://github.com/jwhited/wgsd
