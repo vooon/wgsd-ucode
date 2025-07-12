@@ -46,6 +46,7 @@ const peers = x[device]["peers"];
        const peer_hash = enc_peer(peer_bin);
        const peer_hash_np = enc_peer_no_padding(peer_bin);
        const peer_host = `${ peer_hash }._wireguard._udp`;
+       const peer_host_np = `${ peer_hash_np }._wireguard._udp`;
        const endpoint = data.endpoint;
        // const ep_addr = socket.sockaddr(endpoint);  // XXX BUG return null!
        // const ep_type = (ep_addr.family == socket.AF_INET6) ? "AAAA" : "A";
@@ -61,11 +62,14 @@ const peers = x[device]["peers"];
 _wireguard._udp IN PTR {{ peer_host }}
 {{ peer_host }} IN {{ ep_type }} {{ ep_addr }}
 {{ peer_host }} IN SRV 0 0 {{ ep_port }} {{ peer_host }}
-{{ peer_host }} IN TXT "txtvers=1" "pub={{ peer }}" "allowed={{ allowed }}"
-
+{{ peer_host }} IN TXT "txtvers=1" "pub={{ peer }}" "allowed={{ allowed }}"{# original wgsd format #}
+{{ peer_host }} IN TXT "v=WGSD1;pub={{ peer }};allowed={{ allowed }}"{# alternative format to fix bug https://github.com/jow-/ucode/issues/315 #}
+{%     if (peer_host != peer_host_np): %}
 _wireguard._udp IN PTR {{ peer_host_np }}
 {{ peer_host_np }} IN {{ ep_type }} {{ ep_addr }}
 {{ peer_host_np }} IN SRV 0 0 {{ ep_port }} {{ peer_host_np }}
 {{ peer_host_np }} IN TXT "txtvers=1" "pub={{ peer }}" "allowed={{ allowed }}"
+{{ peer_host_np }} IN TXT "v=WGSD1;pub={{ peer }};allowed={{ allowed }}"
+{%     endif %}
 {%   endif %}
 {% endfor %}
