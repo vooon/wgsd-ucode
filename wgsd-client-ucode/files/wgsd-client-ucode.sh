@@ -10,8 +10,9 @@ panic() {
 interface=""
 dns_server=""
 zone=""
+set_allowed_ips="false"
 
-while getopts "i:z:s:" opt; do
+while getopts "i:z:s:a" opt; do
 	case $opt in
 		i)
 			interface="${OPTARG}"
@@ -21,6 +22,9 @@ while getopts "i:z:s:" opt; do
 			;;
 		s)
 			dns_server="${OPTARG}"
+			;;
+		a)
+			set_allowed_ips="true"
 			;;
 	esac
 done
@@ -49,5 +53,6 @@ esac
 ucode \
 	-Ddevice="$device" -Drpc_object="$rpc_object" -Dwg_bin="$wg_bin" \
 	-Dzone="$zone" -Ddns_server="$dns_server" \
+	-Dset_allowed_ips="$set_allowed_ips" \
 	/usr/share/ucode/wgsd/client.uc
 exit $?

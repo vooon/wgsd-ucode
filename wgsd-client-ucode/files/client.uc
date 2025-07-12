@@ -7,6 +7,10 @@ import { b32enc } from "base32";
 import * as resolv from "resolv";
 import * as socket from "socket";
 
+function enc_peer(key) {
+	return lc(b32enc(key));
+}
+
 function get_addr(r) {
 	if (exists(r, 'rcode') && r.rcode === "NXDOMAIN") {
 		log.ERR("Domain not found: %s\n", qhost);
@@ -21,6 +25,15 @@ function get_addr(r) {
 	}
 
 	return null;
+}
+
+function parse_txt_kv(kvs) {
+	let d = {};
+	for (kv in kvs) {
+		p = split(kv, "=", 2);
+		d[p[0]] = p[1];
+	}
+	return d;
 }
 
 function resolve_dns_server() {
@@ -66,8 +79,8 @@ zone = rtrim(zone, ".");
 let queries = {};
 
 for (peer, data in peers) {
-	const p32 = b32enc(b64dec(peer));
-	const host = lc(`${ p32 }._wireguard._udp.${ zone }`);
+	const p32 = enc_peer(b64dec(peer));
+	const host = `${ p32 }._wireguard._udp.${ zone }`;
 
 	q = {
 		peer: peer,
@@ -75,6 +88,7 @@ for (peer, data in peers) {
 		srv_port: 0,
 		srv_host: '',
 		addr: '',
+		txt_allowed_ips: [],
 		not_found: false,
 		endpoint: data.endpoint,
 		allowed_ips: data.allowed_ips || [],
@@ -101,7 +115,7 @@ const srv_opts = {
 	nameserver: `${dns_server}`,
 };
 
-srvs = resolv.query(srv_hosts, srv_opts);
+const srvs = resolv.query(srv_hosts, srv_opts);
 if (!srvs) {
 	err = resolv.error();
 	log.ERR("Failed to resolve: %s\n", err);
@@ -168,6 +182,39 @@ for (host, resp in addrs) {
 // 3. Parse TXT?
 // TODO skip. Original also don't do that...
 
+if (set_allowed_ips) {
+	log.INFO("Quering TXT %d records...\n", length(addr_hosts));
+
+	const txt_opts = {
+		type: "TXT",
+		nameserver: `${dns_server}`,
+	};
+
+	const txts = resolv.query(addr_hosts, txt_opts);
+	if (!txts) {
+		err = resolv.error();
+		log.ERR("Failed to resolve: %s\n", err);
+		exit(1);
+	}
+
+	for (host, resp in txts) {
+		let q = queries[host];
+		assert(q, "unexpected host");
+
+		if (resp.rcode === "NXDOMAIN") {
+			log.WARN("Peer TXT not found: %s, host: %s\n", q.peer, host);
+			// q.not_found = true;
+			continue;
+		}
+
+		const kv = parse_txt_kv(resp.TXT);
+		assert(kv.txtvers === "1", "unexpected txtvers");
+		assert(kv.pub === q.peer, "unexpected peer pub key");
+
+		q.txt_allowed_ips = filter(map(split(kv.allowed, ","), x => trim(x)), length);
+	}
+}
+
 log.INFO("Resolve complete. Applying...\n");
 
 for (host, q in queries) {
@@ -179,17 +226,32 @@ for (host, q in queries) {
 	let endpoint = `${ q.addr }:${ q.srv_port }`;
 	if (q.endpoint === endpoint) {
 		log.INFO("Peer endpoint match, nothing to do: %s - %s\n", q.peer, q.endpoint);
-		continue;
+	} else {
+		log.NOTE("Changing peer endpoint: %s, %s -> %s\n", q.peer, q.endpoint, endpoint);
+
+		const args = [wg_bin, 'set', device, 'peer', q.peer, 'endpoint', endpoint];
+		log.ulog(log.LOG_DEBUG, "Execute command: %s\n", args);
+
+		rc = system(args);
+		if (rc != 0) {
+			log.ERR("Failed to apply change for peer: %s, rc: %d\n", q.peer, rc);
+		}
 	}
 
-	log.NOTE("Changing peer endpoint: %s, %s -> %s\n", q.peer, q.endpoint, endpoint);
+	let allowed_ips = uniq(q.allowed_ips + q.txt_allowed_ips);
+	if (q.allowed_ips === allowed_ips) {
+		log.INFO("Peer allowed_ips match, nothing to do: %s\n", q.peer);
+	} else {
+		allowed_ips_arg = join(',', allowed_ips);
+		log.NOTE("Changing peer allowed_ips: %s, %s -> %s\n", q.peer, join(',', q.allowed_ips), allowed_ips_arg);
 
-	const args = [wg_bin, 'set', device, 'peer', q.peer, 'endpoint', endpoint];
-	log.ulog(log.LOG_DEBUG, "Execute command: %s\n", args);
+		const args = [wg_bin, 'set', device, 'peer', q.peer, 'allowed-ips', allowed_ips_arg];
+		log.ulog(log.LOG_DEBUG, "Execute command: %s\n", args);
 
-	rc = system(args);
-	if (rc != 0) {
-		log.ERR("Failed to apply change for peer: %s, rc: %d\n", q.peer, rc);
+		rc = system(args);
+		if (rc != 0) {
+			log.ERR("Failed to apply change for peer: %s, rc: %d\n", q.peer, rc);
+		}
 	}
 }
 
