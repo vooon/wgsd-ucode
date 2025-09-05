@@ -2,7 +2,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=coredns
 PKG_VERSION:=1.12.3
-PKG_RELEASE:=1
+PKG_RELEASE:=2
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_PROTO:=git
@@ -49,6 +49,7 @@ endef
 
 define Package/coredns/conffiles
 /etc/Corefile
+/etc/coredns/
 endef
 
 GO_PKG_CUSTOM_LDFLAGS += \
@@ -97,8 +98,12 @@ define Package/coredns/install
 
 	$(INSTALL_DIR) $(1)/etc/
 	$(INSTALL_CONF) $(CURDIR)/files/Corefile $(1)/etc/Corefile
+	$(INSTALL_DIR) $(1)/etc/config/
+	$(INSTALL_CONF) $(CURDIR)/files/coredns.conf $(1)/etc/config/coredns
 	$(INSTALL_DIR) $(1)/etc/init.d/
 	$(INSTALL_BIN) $(CURDIR)/files/coredns.init $(1)/etc/init.d/coredns
+
+	$(INSTALL_DIR) $(1)/etc/coredns/zones/
 endef
 
 $(eval $(call BuildPackage,coredns))
