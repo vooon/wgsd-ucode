@@ -32,7 +32,6 @@ define Package/coredns
   TITLE:=CoreDNS
   URL:=https://coredns.io
   DEPENDS:=$(GO_ARCH_DEPENDS) +COREDNS_PLUGIN_WGSD:kmod-wireguard
-  PROVIDES:=wgsd-coredns
   MENU:=1
 endef
 
@@ -48,6 +47,7 @@ define Package/coredns/config
 endef
 
 define Package/coredns/conffiles
+/etc/config/coredns
 /etc/Corefile
 /etc/coredns/
 endef
