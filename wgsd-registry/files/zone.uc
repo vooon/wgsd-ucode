@@ -52,7 +52,7 @@ const peers = x[device]["peers"];
        // const ep_type = (ep_addr.family == socket.AF_INET6) ? "AAAA" : "A";
        // assert(ep_addr, "endpoint parse error");
        const port_sep = rindex(endpoint, ':');
-       const ep_addr = substr(endpoint, 0, port_sep);
+       const ep_addr = rtrim(ltrim(substr(endpoint, 0, port_sep), "["), "]");
        const ep_port = substr(endpoint, port_sep + 1);
        const ep_type = (index(ep_addr, ':') >= 0) ? "AAAA" : "A";
        assert(endpoint, "no endpoint");
