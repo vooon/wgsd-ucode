@@ -39,7 +39,6 @@ define Package/coredns/description
   CoreDNS is a fast and flexible DNS server.
   The key word here is flexible: with CoreDNS you are able to do what you want
   with your DNS data by utilizing plugins.
-  If some functionality is not provided out of the box you can add it by writing a plugin.
 endef
 
 define Package/coredns/config
