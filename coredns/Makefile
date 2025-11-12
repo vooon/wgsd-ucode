@@ -8,7 +8,7 @@ PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/coredns/coredns.git
 PKG_MIRROR_HASH:=86a8127635ade114c0784d18dfae544ed165a153a548def1458ff3c7b1497927
-PKG_SOURCE_VERSION:=v${PKG_VERSION}
+PKG_SOURCE_VERSION:=v$(PKG_VERSION)
 
 PKG_LICENSE:=Apache-2.0
 PKG_LICENSE_FILES:=LICENSE
@@ -51,10 +51,9 @@ define Package/coredns/conffiles
 /etc/coredns/
 endef
 
-GO_PKG_CUSTOM_LDFLAGS += \
-	-w -s \
-	-X github.com/coredns/coredns/coremain.GitCommit=v$(PKG_VERSION) \
-	-X github.com/coredns/coredns/coremain.gitTag=v$(PKG_VERSION)
+GO_PKG_LDFLAGS_X:= \
+	github.com/coredns/coredns/coremain.GitCommit=v$(PKG_VERSION) \
+	github.com/coredns/coredns/coremain.gitTag=v$(PKG_VERSION)
 
 define configure-plugin
 	sed '/^$(2):/d' -i "$(PKG_BUILD_DIR)/plugin.cfg"
