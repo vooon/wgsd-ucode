@@ -54,7 +54,7 @@ define Package/coredns/conffiles
 endef
 
 define configure-plugin
-	sed '/^$(2):/d' -i "$(PKG_BUILD_DIR)/plugin.cfg"
+	$(SED) '/^$(2):/d' "$(PKG_BUILD_DIR)/plugin.cfg"
 ifeq ($(1),y)
 	echo "$(2):$(3)" >> "$(PKG_BUILD_DIR)/plugin.cfg"
 endif
