@@ -4,10 +4,9 @@ PKG_NAME:=coredns
 PKG_VERSION:=1.13.1
 PKG_RELEASE:=1
 
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/coredns/coredns.git
-PKG_MIRROR_HASH:=86a8127635ade114c0784d18dfae544ed165a153a548def1458ff3c7b1497927
+PKG_MIRROR_HASH:=8c85fe985497397b5ad085ff36c21c7657ecfd7dcd27bed169b404cdc9d4af18
 PKG_SOURCE_VERSION:=v$(PKG_VERSION)
 
 PKG_LICENSE:=Apache-2.0
@@ -20,6 +19,9 @@ PKG_BUILD_FLAGS:=no-mips16
 
 GO_PKG:=github.com/coredns/coredns
 GO_PKG_EXCLUDES:=test
+GO_PKG_LDFLAGS_X:= \
+	github.com/coredns/coredns/coremain.GitCommit=v$(PKG_VERSION) \
+	github.com/coredns/coredns/coremain.gitTag=v$(PKG_VERSION)
 
 include $(INCLUDE_DIR)/package.mk
 # include ../../lang/golang/golang-package.mk
@@ -51,10 +53,6 @@ define Package/coredns/conffiles
 /etc/coredns/
 endef
 
-GO_PKG_LDFLAGS_X:= \
-	github.com/coredns/coredns/coremain.GitCommit=v$(PKG_VERSION) \
-	github.com/coredns/coredns/coremain.gitTag=v$(PKG_VERSION)
-
 define configure-plugin
 	sed '/^$(2):/d' -i "$(PKG_BUILD_DIR)/plugin.cfg"
 ifeq ($(1),y)
@@ -85,10 +83,13 @@ define Build/Configure
 	$(GO_PKG_BUILD_CONFIG_VARS) \
 	go generate coredns.go
 
+	# NOTE: custom plugins needs go get to pull new dependencies
+ifeq ($(CONFIG_COREDNS_PLUGIN_WGSD),y)
 	cd $(PKG_BUILD_DIR); \
 	$(GO_GENERAL_BUILD_CONFIG_VARS) \
 	$(GO_PKG_BUILD_CONFIG_VARS) \
 	go get ./...
+endif
 
 endef
 
