@@ -77,6 +77,7 @@ define Build/Configure
 	$(call configure-plugin,$(CONFIG_COREDNS_PLUGIN_ON),on,github.com/coredns/caddy/onevent)
 	$(call configure-plugin,$(CONFIG_COREDNS_PLUGIN_NOMAD),nomad,nomad)
 	$(call configure-plugin,$(CONFIG_COREDNS_PLUGIN_WGSD),wgsd,github.com/jwhited/wgsd)
+	$(call configure-plugin,$(CONFIG_COREDNS_PLUGIN_NETBOX),netbox,github.com/oz123/coredns-netbox-plugin)
 
 	cd $(PKG_BUILD_DIR); \
 	$(GO_GENERAL_BUILD_CONFIG_VARS) \
@@ -84,7 +85,7 @@ define Build/Configure
 	go generate coredns.go
 
 	# NOTE: custom plugins needs go get to pull new dependencies
-ifeq ($(CONFIG_COREDNS_PLUGIN_WGSD),y)
+ifeq ($(CONFIG_COREDNS_REQUIRE_GO_GET),y)
 	cd $(PKG_BUILD_DIR); \
 	$(GO_GENERAL_BUILD_CONFIG_VARS) \
 	$(GO_PKG_BUILD_CONFIG_VARS) \

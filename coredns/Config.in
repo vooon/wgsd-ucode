@@ -51,6 +51,7 @@ config COREDNS_PLUGIN_NOMAD
 config COREDNS_PLUGIN_WGSD
 	bool "WireGuard Service Discovery plugin"
 	default y if PACKAGE_wgsd-coredns
+	select COREDNS_REQUIRE_GO_GET
 	help
 		wgsd is a CoreDNS plugin that serves WireGuard peer information via DNS-SD (RFC6763) semantics.
 		This enables use cases such as:
@@ -58,5 +59,16 @@ config COREDNS_PLUGIN_WGSD
 		- Building a mesh of WireGuard peers from a central registry
 		- Dynamic discovery of WireGuard Endpoint addressing (both IP address and port number)
 		- NAT-to-NAT WireGuard connectivity where UDP hole punching is supported.
+
+config COREDNS_PLUGIN_NETBOX
+	bool "Netbox plugin"
+	default n
+	select COREDNS_REQUIRE_GO_GET
+
+config COREDNS_REQUIRE_GO_GET
+	bool
+	default n
+	help
+		Custom plugins require `go get ./...` to pull dependencies.
 
 endif
