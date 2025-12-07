@@ -80,6 +80,9 @@ define Build/Configure
 	$(call configure-plugin,$(CONFIG_COREDNS_PLUGIN_NETBOX),netbox,github.com/oz123/coredns-netbox-plugin)
 	$(call configure-plugin,$(CONFIG_COREDNS_PLUGIN_ALTERNATE),alternate,github.com/coredns/alternate)
 
+	# NOTE: alternate hack: https://github.com/coredns/alternate#building-coredns-with-alternate
+	$(call configure-plugin,y,forward,forward)
+
 	cd $(PKG_BUILD_DIR); \
 	$(GO_GENERAL_BUILD_CONFIG_VARS) \
 	$(GO_PKG_BUILD_CONFIG_VARS) \
