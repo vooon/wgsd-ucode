@@ -78,6 +78,7 @@ define Build/Configure
 	$(call configure-plugin,$(CONFIG_COREDNS_PLUGIN_NOMAD),nomad,nomad)
 	$(call configure-plugin,$(CONFIG_COREDNS_PLUGIN_WGSD),wgsd,github.com/jwhited/wgsd)
 	$(call configure-plugin,$(CONFIG_COREDNS_PLUGIN_NETBOX),netbox,github.com/oz123/coredns-netbox-plugin)
+	$(call configure-plugin,$(CONFIG_COREDNS_PLUGIN_ALTERNATE),alternate,github.com/coredns/alternate)
 
 	cd $(PKG_BUILD_DIR); \
 	$(GO_GENERAL_BUILD_CONFIG_VARS) \
