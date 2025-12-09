@@ -65,11 +65,6 @@ config COREDNS_PLUGIN_NETBOX
 	default n
 	select COREDNS_REQUIRE_GO_GET
 
-config COREDNS_PLUGIN_ALTERNATE
-	bool "Alternate plugin"
-	default n
-	select COREDNS_REQUIRE_GO_GET
-
 config COREDNS_REQUIRE_GO_GET
 	bool
 	default n
