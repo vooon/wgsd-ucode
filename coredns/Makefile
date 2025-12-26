@@ -2,7 +2,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=coredns
 PKG_VERSION:=1.13.2
-PKG_RELEASE:=1
+PKG_RELEASE:=2
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/coredns/coredns.git
@@ -79,6 +79,7 @@ define Build/Configure
 	$(call configure-plugin,$(CONFIG_COREDNS_PLUGIN_WGSD),wgsd,github.com/jwhited/wgsd)
 	$(call configure-plugin,$(CONFIG_COREDNS_PLUGIN_NETBOX),netbox,github.com/oz123/coredns-netbox-plugin)
 	$(call configure-plugin,$(CONFIG_COREDNS_PLUGIN_FANOUT),fanout,github.com/networkservicemesh/fanout)
+	$(call configure-plugin,$(CONFIG_COREDNS_PLUGIN_FINALIZE),finalize,github.com/tmeckel/coredns-finalizer)
 
 	cd $(PKG_BUILD_DIR); \
 	$(GO_GENERAL_BUILD_CONFIG_VARS) \
