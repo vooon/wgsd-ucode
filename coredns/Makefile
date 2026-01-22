@@ -84,6 +84,7 @@ define Build/Configure
 	cd $(PKG_BUILD_DIR); \
 	$(GO_GENERAL_BUILD_CONFIG_VARS) \
 	$(GO_PKG_BUILD_CONFIG_VARS) \
+	$(GO_PKG_VARS) \
 	go generate coredns.go
 
 	# NOTE: custom plugins needs go get to pull new dependencies
@@ -91,6 +92,7 @@ ifeq ($(CONFIG_COREDNS_REQUIRE_GO_GET),y)
 	cd $(PKG_BUILD_DIR); \
 	$(GO_GENERAL_BUILD_CONFIG_VARS) \
 	$(GO_PKG_BUILD_CONFIG_VARS) \
+	$(GO_PKG_VARS) \
 	go get ./...
 endif
 
