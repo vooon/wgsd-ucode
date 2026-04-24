@@ -1,17 +1,18 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=coredns
-PKG_VERSION:=1.14.2
+PKG_VERSION:=1.14.3
 PKG_RELEASE:=1
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/coredns/coredns.git
-PKG_MIRROR_HASH:=6d82a06f7fe8b0f54a919058e8cd2839a113b81dd9d0217e280d2bea665668ce
+PKG_MIRROR_HASH:=9d4304f736454b719a55c910a3b906010be51c1a4adba67f9fde23394ffdba41
 PKG_SOURCE_VERSION:=v$(PKG_VERSION)
 
 PKG_LICENSE:=Apache-2.0
 PKG_LICENSE_FILES:=LICENSE
 PKG_MAINTAINER:=Vladimir Ermakov <vooon341@gmail.com>
+PKG_CPE_ID:=cpe:/a:coredns.io:coredns
 
 PKG_BUILD_DEPENDS:=golang/host
 PKG_BUILD_PARALLEL:=1
@@ -84,7 +85,6 @@ define Build/Configure
 	cd $(PKG_BUILD_DIR); \
 	$(GO_GENERAL_BUILD_CONFIG_VARS) \
 	$(GO_PKG_BUILD_CONFIG_VARS) \
-	$(GO_PKG_VARS) \
 	go generate coredns.go
 
 	# NOTE: custom plugins needs go get to pull new dependencies
