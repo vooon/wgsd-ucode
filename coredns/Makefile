@@ -1,12 +1,12 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=coredns
-PKG_VERSION:=1.14.3
+PKG_VERSION:=1.14.4
 PKG_RELEASE:=1
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/coredns/coredns.git
-PKG_MIRROR_HASH:=9d4304f736454b719a55c910a3b906010be51c1a4adba67f9fde23394ffdba41
+PKG_MIRROR_HASH:=6e120ca738f4d4eaff851de6de7d78ee542200c72ef639f66e0c34491db5a2fe
 PKG_SOURCE_VERSION:=v$(PKG_VERSION)
 
 PKG_LICENSE:=Apache-2.0
@@ -94,6 +94,15 @@ ifeq ($(CONFIG_COREDNS_REQUIRE_GO_GET),y)
 	$(GO_PKG_BUILD_CONFIG_VARS) \
 	$(GO_PKG_VARS) \
 	go get ./...
+endif
+ifeq ($(CONFIG_COREDNS_PLUGIN_WGSD),y)
+	# wgsd -> wgctrl -> genetlink -> netlink v1.6.2 is incompatible with
+	# socket v0.5.x (Sendmsg/Recvmsg gained context.Context); pin to v1.7.2
+	cd $(PKG_BUILD_DIR); \
+	$(GO_GENERAL_BUILD_CONFIG_VARS) \
+	$(GO_PKG_BUILD_CONFIG_VARS) \
+	$(GO_PKG_VARS) \
+	go get github.com/mdlayher/netlink@v1.7.2
 endif
 
 endef
