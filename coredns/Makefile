@@ -81,6 +81,7 @@ define Build/Configure
 	$(call configure-plugin,$(CONFIG_COREDNS_PLUGIN_NETBOX),netbox,github.com/oz123/coredns-netbox-plugin)
 	$(call configure-plugin,$(CONFIG_COREDNS_PLUGIN_FANOUT),fanout,github.com/networkservicemesh/fanout)
 	$(call configure-plugin,$(CONFIG_COREDNS_PLUGIN_FINALIZE),finalize,github.com/tmeckel/coredns-finalizer)
+	$(call configure-plugin,$(CONFIG_COREDNS_PLUGIN_GSLB),gslb,github.com/dmachard/coredns-gslb)
 
 	cd $(PKG_BUILD_DIR); \
 	$(GO_GENERAL_BUILD_CONFIG_VARS) \

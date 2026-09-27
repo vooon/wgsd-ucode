@@ -112,6 +112,18 @@ config COREDNS_PLUGIN_NETBOX
 	help
 	  Serve DNS records from a NetBox IPAM/DCIM instance.
 
+config COREDNS_PLUGIN_GSLB
+	bool "GSLB plugin"
+	default n
+	select COREDNS_REQUIRE_GO_GET
+	help
+	  CoreDNS-GSLB adds Global Server Load Balancing to CoreDNS for
+	  non-Kubernetes infrastructures (VMs, bare metal, hybrid cloud).
+	  Features: health monitoring (HTTP/S, TCP, ICMP, MySQL, gRPC, Lua),
+	  GeoIP and weighted/round-robin/IP-hash selection, failover policies,
+	  live config reload, REST API, Prometheus metrics and optional
+	  Redis-backed HA synchronization.
+
 config COREDNS_PLUGIN_FANOUT
 	bool "Fanout plugin"
 	default n
