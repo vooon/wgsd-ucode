@@ -124,6 +124,16 @@ config COREDNS_PLUGIN_GSLB
 	  live config reload, REST API, Prometheus metrics and optional
 	  Redis-backed HA synchronization.
 
+config COREDNS_PLUGIN_MULTICLUSTER
+	bool "Multicluster plugin"
+	default n
+	select COREDNS_REQUIRE_GO_GET
+	help
+	  Implementation of the Kubernetes DNS-Based Multicluster Service
+	  Discovery Specification (clusterset.local). Adds a large
+	  k8s.io/client-go dependency tree and is only useful when
+	  querying remote Kubernetes clusters.
+
 config COREDNS_PLUGIN_FANOUT
 	bool "Fanout plugin"
 	default n
