@@ -2,7 +2,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=coredns
 PKG_VERSION:=1.14.7
-PKG_RELEASE:=1
+PKG_RELEASE:=2
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/coredns/coredns.git
@@ -54,14 +54,29 @@ define Package/coredns/conffiles
 /etc/coredns/
 endef
 
+# Keep pristine plugin.cfg, so every configure starts from upstream order
+define Build/Prepare
+	$(call Build/Prepare/Default)
+	cp "$(PKG_BUILD_DIR)/plugin.cfg" "$(PKG_BUILD_DIR)/plugin.cfg.orig"
+endef
+
+# configure-plugin <enabled> <name> <package> [<anchor> [i|a]]
+# plugin.cfg order defines plugin chain order. Built-in plugins keep their
+# upstream position; new ones are inserted before (i, default) or after (a)
+# <anchor>, or appended at the end if no anchor given.
 define configure-plugin
 	$(if $(filter y,$(1)),\
-		grep -q '^$(2):' "$(PKG_BUILD_DIR)/plugin.cfg" || echo "$(2):$(3)" >> "$(PKG_BUILD_DIR)/plugin.cfg",\
+		grep -q '^$(2):' "$(PKG_BUILD_DIR)/plugin.cfg" || \
+		$(if $(4),\
+			{ grep -q '^$(4):' "$(PKG_BUILD_DIR)/plugin.cfg" && \
+			$(SED) '/^$(4):/$(or $(5),i) $(2):$(3)' "$(PKG_BUILD_DIR)/plugin.cfg"; },\
+			echo "$(2):$(3)" >> "$(PKG_BUILD_DIR)/plugin.cfg"),\
 		$(SED) '/^$(2):/d' "$(PKG_BUILD_DIR)/plugin.cfg")
 endef
 
 define Build/Configure
 	$(call GoPackage/Build/Configure,$(1))
+	cp "$(PKG_BUILD_DIR)/plugin.cfg.orig" "$(PKG_BUILD_DIR)/plugin.cfg"
 
 	# NOTE: allow to disable unneded heavy plugin
 	$(call configure-plugin,$(CONFIG_COREDNS_PLUGIN_GEOIP),geoip,geoip)
@@ -77,12 +92,13 @@ define Build/Configure
 	$(call configure-plugin,$(CONFIG_COREDNS_PLUGIN_PROXYPROTO),proxyproto,proxyproto)
 	$(call configure-plugin,$(CONFIG_COREDNS_PLUGIN_ON),on,github.com/coredns/caddy/onevent)
 	$(call configure-plugin,$(CONFIG_COREDNS_PLUGIN_NOMAD),nomad,nomad)
-	$(call configure-plugin,$(CONFIG_COREDNS_PLUGIN_WGSD),wgsd,github.com/jwhited/wgsd)
-	$(call configure-plugin,$(CONFIG_COREDNS_PLUGIN_NETBOX),netbox,github.com/oz123/coredns-netbox-plugin)
-	$(call configure-plugin,$(CONFIG_COREDNS_PLUGIN_FANOUT),fanout,github.com/networkservicemesh/fanout)
-	$(call configure-plugin,$(CONFIG_COREDNS_PLUGIN_FINALIZE),finalize,github.com/tmeckel/coredns-finalizer)
-	$(call configure-plugin,$(CONFIG_COREDNS_PLUGIN_GSLB),gslb,github.com/dmachard/coredns-gslb)
-	$(call configure-plugin,$(CONFIG_COREDNS_PLUGIN_MULTICLUSTER),multicluster,github.com/coredns/multicluster)
+	# NOTE: third-party plugins, positioned per upstream recommendations
+	$(call configure-plugin,$(CONFIG_COREDNS_PLUGIN_NETBOX),netbox,github.com/oz123/coredns-netbox-plugin,cache,a)
+	$(call configure-plugin,$(CONFIG_COREDNS_PLUGIN_FINALIZE),finalize,github.com/tmeckel/coredns-finalizer,cache,a)
+	$(call configure-plugin,$(CONFIG_COREDNS_PLUGIN_MULTICLUSTER),multicluster,github.com/coredns/multicluster,file)
+	$(call configure-plugin,$(CONFIG_COREDNS_PLUGIN_WGSD),wgsd,github.com/jwhited/wgsd,file)
+	$(call configure-plugin,$(CONFIG_COREDNS_PLUGIN_GSLB),gslb,github.com/dmachard/coredns-gslb,file)
+	$(call configure-plugin,$(CONFIG_COREDNS_PLUGIN_FANOUT),fanout,github.com/networkservicemesh/fanout,forward)
 
 	cd $(PKG_BUILD_DIR); \
 	$(GO_GENERAL_BUILD_CONFIG_VARS) \
