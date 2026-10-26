@@ -92,6 +92,21 @@ config COREDNS_PLUGIN_ON
 	help
 	  Execute a command on server start/shutdown events.
 
+config COREDNS_PLUGIN_SIIT
+	bool "SIIT plugin"
+	default n
+	help
+	  Synthesize A records from AAAA records within a SIIT prefix
+	  (IPv6->IPv4 translation, RFC 6052 / RFC 7757 EAM).
+
+config COREDNS_PLUGIN_DYNUPDATE
+	bool "Dynamic update plugin"
+	default n
+	help
+	  Accept TSIG-authenticated RFC 2136 DNS UPDATE messages for an
+	  opt-in authoritative zone, optionally persisted in a local bbolt
+	  database. Experimental.
+
 comment "Third-party Plugins"
 
 config COREDNS_PLUGIN_WGSD

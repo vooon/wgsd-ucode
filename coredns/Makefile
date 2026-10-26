@@ -92,6 +92,8 @@ define Build/Configure
 	$(call configure-plugin,$(CONFIG_COREDNS_PLUGIN_PROXYPROTO),proxyproto,proxyproto)
 	$(call configure-plugin,$(CONFIG_COREDNS_PLUGIN_ON),on,github.com/coredns/caddy/onevent)
 	$(call configure-plugin,$(CONFIG_COREDNS_PLUGIN_NOMAD),nomad,nomad)
+	$(call configure-plugin,$(CONFIG_COREDNS_PLUGIN_SIIT),siit,siit)
+	$(call configure-plugin,$(CONFIG_COREDNS_PLUGIN_DYNUPDATE),dynupdate,dynupdate)
 	# NOTE: third-party plugins, positioned per upstream recommendations
 	$(call configure-plugin,$(CONFIG_COREDNS_PLUGIN_NETBOX),netbox,github.com/oz123/coredns-netbox-plugin,cache,a)
 	$(call configure-plugin,$(CONFIG_COREDNS_PLUGIN_FINALIZE),finalize,github.com/tmeckel/coredns-finalizer,cache,a)
